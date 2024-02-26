@@ -14,8 +14,8 @@ app.use((req, res, next) => {
 });
 
 const userSocketMap = {};
-
-function getAllConnectClients(roomId) {
+function getAllConnectedClients(roomId) {
+  // Map
   return Array.from(io.sockets.adapter.rooms.get(roomId) || []).map(
     (socketId) => {
       return {
@@ -30,9 +30,10 @@ io.on("connection", (socket) => {
   console.log("socket connected", socket.id);
 
   socket.on(ACTIONS.JOIN, ({ roomId, username }) => {
+    console.log(`User ${username} joined room ${roomId}`);
     userSocketMap[socket.id] = username;
     socket.join(roomId);
-    const clients = getAllConnectClients(roomId);
+    const clients = getAllConnectedClients(roomId);
     clients.forEach(({ socketId }) => {
       io.to(socketId).emit(ACTIONS.JOINED, {
         clients,
@@ -63,5 +64,5 @@ io.on("connection", (socket) => {
   });
 });
 
-const PORT = process.env.PORT || 5000;
-server.listen(PORT, () => console.log(`listening on port ${PORT}`));
+const PORT = process.env.PORT || 4000;
+server.listen(PORT, () => console.log(`Listening on port ${PORT}`));

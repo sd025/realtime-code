@@ -7,5 +7,19 @@ export const initSocket = async () => {
     timeout: 10000,
     transports: ["websocket"],
   };
-  return io(process.env.REACT_APP_BACKEND_URL, options);
+  const socket = io("http://localhost:4000", options);
+
+  socket.on("connect", () => {
+    console.log("Socket connected:", socket.id);
+  });
+
+  socket.on("connect_error", (err) => {
+    console.error("Socket connection error:", err);
+  });
+
+  socket.on("disconnect", () => {
+    console.log("Socket disconnected");
+  });
+
+  return socket;
 };

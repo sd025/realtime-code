@@ -19,26 +19,6 @@ const EditorPage = () => {
     const reactNavigator = useNavigate();
     const [clients, setClients] = useState([]);
 
-    //codepens
-    const [html, setHtml] = useLocalStorage('html', '')
-    const [css, setCss] = useLocalStorage('css', '')
-    const [js, setJs] = useLocalStorage('js', '')
-    const [srcDoc, setSrcDoc] = useState('')
-    
-    useEffect(() => {
-        const timeout = setTimeout(() => {
-          setSrcDoc(`
-            <html>
-              <body>${html}</body>
-              <style>${css}</style>
-              <script>${js}</script>
-            </html>
-          `)
-        }, 250)
-    
-        return () => clearTimeout(timeout)
-      }, [html, css, js])
-      
     useEffect(() => {
         const init = async () => {
             socketRef.current = await initSocket();
@@ -87,9 +67,11 @@ const EditorPage = () => {
         };
         init();
         return () => {
-            socketRef.current.disconnect();
-            socketRef.current.off(ACTIONS.JOINED);
-            socketRef.current.off(ACTIONS.DISCONNECTED);
+            if (socketRef.current) {
+                socketRef.current.disconnect();
+                socketRef.current.off(ACTIONS.JOINED);
+                socketRef.current.off(ACTIONS.DISCONNECTED);
+            }
         };
     }, []);
 
@@ -116,11 +98,7 @@ const EditorPage = () => {
             <div className="aside">
                 <div className="asideInner">
                     <div className="logo">
-                        <img
-                            className="logoImage"
-                            src="/code-sync.png"
-                            alt="logo"
-                        />
+                    <h1>&lt; Multiplayer code &gt; </h1>
                     </div>
                     <h3>Connected</h3>
                     <div className="clientsList">

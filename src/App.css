@@ -16,7 +16,7 @@
 
 .header {
   font-weight: bolder;
-  color: #4aed88;
+  color: #fd5;
   font-size: 40px;
 }
 .inputGroup {
@@ -57,14 +57,14 @@
 
 .joinBtn,
 .leaveBtn {
-  background: #4aed88;
+  background: #fd5;
   width: 100px;
   margin-left: auto;
 }
 
 .joinBtn:hover,
 .leaveBtn:hover {
-  background: #2b824c;
+  background: #6c6;
 }
 
 .createInfo {
@@ -73,9 +73,9 @@
 }
 
 .createNewBtn {
-  color: #4aed88;
+  color: #fd5;
   text-decoration: none;
-  border-bottom: 1px solid #4aed88;
+  border-bottom: 1px solid #fd5;
   transition: all 0.3s ease-in-out;
 }
 
@@ -105,7 +105,8 @@ footer a:hover {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
-  gap: 20px;
+  /* gap: 20px; */
+  margin: 0 14px;
 }
 
 .client {
@@ -113,16 +114,40 @@ footer a:hover {
   align-items: center;
   flex-direction: column;
   font-weight: bold;
-}
-.userName {
-  margin-top: 10px;
+  margin-left: -1rem;
+  margin-bottom: 10px;
+
 }
 
+.client:hover {
+  transform: translateY(-10%);
+  transition: all .3s cubic-bezier(0,.41,.32,1.48);
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  }
+.client:hover .userName {
+  margin-top: 10px;
+  display: block;
+
+}
+.userName {
+  display: none;
+  position: absolute;
+  top: 55px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 8px;
+  background-color: #282a36;
+  color: #fff;
+  border-radius: 5px;
+  font-size: 14px;
+  z-index: 1;
+
+}
 .logo {
   border-bottom: 1px solid #424242;
   padding-bottom: 10px;
   font-size: 10px;
-  color: #4aed88;
+  color: #fd5;
 }
 
 .leaveBtn {

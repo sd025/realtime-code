@@ -260,16 +260,14 @@ const EditorPage = () => {
       </div>
     </div> */}
         <div className="main-screen">
-        <div>
-          <title>Editor | Code Online</title>
-        </div>
         <div className="inner-screen">
-        <div className="aside">
-        <div className="asideInner">
-          <div className="logo">
-            <h1>&lt; Multiplayer code &gt; </h1>
-          </div>
-          <div className="flex-col  my-4 w-full ">
+          {/* <div className="left-sidebar">
+            <div className="inner-sidebar">
+              <div className="title-sidebar">
+                <h1 className="head-side">Code Online</h1>
+              </div>
+              <hr />
+              <div className="mid-side">
             {Object.keys(dummyFilesData).map((keyName, i) => {
               let fileData = dummyFilesData[keyName];
 
@@ -286,7 +284,56 @@ const EditorPage = () => {
                   }
                 >
                   <img width="20px" height="20px" src={fileData.iconName} />
-                  <p className="mx-4">{fileData.name}</p>
+                  <p className="title-tech">{fileData.name}</p>
+                </div>
+              );
+            })}
+          </div>
+              <h3>Connected</h3>
+              <div className="clientsList">
+              {clients.map((client) => (
+              <Client key={client.socketId} username={client.username} />
+            ))}
+              </div>
+            </div>
+            <div className="mx-3">
+              <button
+                onClick={copyRoomId}
+                className="btn copyBtn"
+              >
+                Copy ROOM ID
+              </button>
+              <button
+                onClick={leaveRoom}
+                className="btn leaveBtn"
+              >
+                Leave
+              </button>
+            </div>
+          </div> */}
+          <div className="aside">
+        <div className="asideInner">
+          <div className="logo">
+            <h1>&lt; Multiplayer code &gt; </h1>
+          </div>
+          <div className="mid-side">
+            {Object.keys(dummyFilesData).map((keyName, i) => {
+              let fileData = dummyFilesData[keyName];
+
+              return (
+                <div
+                  key={fileData.language}
+                  onClick={() => {
+                    setActiveFile(fileData.name);
+                  }}
+                  className={
+                    fileData.name === activeFile
+                      ? 'bg-one'
+                      : 'bg-two'
+                  }
+                >
+                  <img width="20px" height="20px" src={fileData.iconName} />
+                  <p className="title-tech">{fileData.name}</p>
                 </div>
               );
             })}
@@ -299,7 +346,7 @@ const EditorPage = () => {
           </div>
         </div>
         <button className="btn copyBtn" onClick={copyRoomId}>
-          Copy ROOM ID
+          Share Room ID
         </button>
         <button className="btn leaveBtn" onClick={leaveRoom}>
           Leave

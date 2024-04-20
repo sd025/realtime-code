@@ -121,7 +121,7 @@ footer a:hover {
 .client:hover {
   transform: translateY(-10%);
   transition: all 0.3s cubic-bezier(0, 0.41, 0.32, 1.48);
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1),
+  box-shadow: 0 20px 25px -5px rgba(248, 245, 245, 0.1),
     0 10px 10px -5px rgba(0, 0, 0, 0.04);
 }
 .client:hover .userName {
@@ -168,7 +168,7 @@ footer a:hover {
 
 .primary-button {
   height: 2.5rem; /* h-10 */
-  padding: 0 1.5rem; /* px-6 */
+  padding: 0 1.5rem; 
   font-weight: 600; /* font-semibold */
   border-radius: 0.375rem; /* rounded-md */
   background-color: #3182ce; /* bg-primary */
@@ -180,7 +180,8 @@ footer a:hover {
   background-color: #000; /* bg-black */
   display: flex; /* flex */
   align-items: center; /* items-center */
-  padding-left: 2rem; /* pl-8 */
+  justify-content: space-between;
+  padding-left: 2rem;
 }
 
 .console-header p {
@@ -189,12 +190,21 @@ footer a:hover {
 
 .console-header .console-clear {
   cursor: pointer;
-  margin-left: 1.25rem; /* ml-5 */
+  color: #000;
+  padding: 0.7rem;
+  border-radius: 25px;
+  font-weight: 800;
+  background-color: white;
+}
+.console-clear:hover {
+  background-color: #6c6;
+  transition: all 0.3s ease-in-out;
 }
 
 .console-content {
-  height: calc(100vh - 3rem); /* h-full */
-  color: #000; /* text-black */
+  height: 30vh;
+  overflow: auto; 
+  background-color: #000; /* text-black */
   padding: 0.75rem; /* px-3 */
   padding-top: 1rem; /* pt-3 */
 }
@@ -209,9 +219,8 @@ footer a:hover {
 
 /* comp editor library */
 .editor-header {
-  height: 2.5rem; /* h-10 */
   background-color: #0d1117; /* bg-bgdark */
-  padding: 2rem; /* p-8 */
+  padding: 1.1rem; 
   display: flex; /* flex */
   align-items: center; /* items-center */
   justify-content: center; /* justify-center */
@@ -219,28 +228,30 @@ footer a:hover {
 
 .editor-content {
   font-size: 1.25rem; /* text-xl */
-  height: calc(100vh - 2.5rem); /* 91vh */
+  /* height: calc(100vh - 2.5rem); */
 }
 
 /* editorpage some style fixes */
 .bg-one {
   display: flex;
-  padding: 1rem;
   justify-content: flex-start;
   align-items: center;
   width: 100%;
+  padding: 0 8px;
+  border-radius: 30px;
   background-color: #383838;
   cursor: pointer;
 }
 
 .bg-one,
 .bg-two:hover {
+  border-radius: 30px;
   background-color: #000000;
 }
 
 .bg-two {
   display: flex;
-  padding: 1rem;
+  padding: 0 8px;
   justify-content: flex-start;
   align-items: center;
   width: 100%;
@@ -253,17 +264,15 @@ footer a:hover {
 }
 
 .complete-editor {
-  height: 98vh;
+  /* height: 100vh; */
   display: grid;
   grid-template-columns: repeat(2,minmax(0,1fr));
 }
 
 .main-screen {
   display: flex;
-  --tw-text-opacity: 1;
-  color: rgb(255 255 255 / var(--tw-text-opacity));
-  --tw-bg-opacity: 1;
-  background-color: rgb(17 8 47 / var(--tw-bg-opacity));
+  color: rgb(255 255 255 );
+  background-color: rgb(255, 255, 255);
 }
 .inner-screen {
   display: grid;

@@ -15,7 +15,7 @@ app.use((req, res, next) => {
 
 const userSocketMap = {};
 function getAllConnectedClients(roomId) {
-  // Map
+
   return Array.from(io.sockets.adapter.rooms.get(roomId) || []).map(
     (socketId) => {
       return {
@@ -43,24 +43,25 @@ io.on("connection", (socket) => {
     });
   });
 
-  socket.on(ACTIONS.CODE_CHANGE, ({ roomId, code }) => {
-    socket.in(roomId).emit(ACTIONS.CODE_CHANGE, { code });
+  socket.on(ACTIONS.CODE_CHANGE, ({ roomId, html,css, js }) => {
+    socket.in(roomId).emit(ACTIONS.CODE_CHANGE, { html,css, js });
   });
 
-  socket.on(ACTIONS.SYNC_CODE, ({ socketId, code }) => {
-    io.to(socketId).emit(ACTIONS.CODE_CHANGE, { code });
+  socket.on(ACTIONS.SYNC_CODE, ({ socketId, html,css, js }) => {
+    console.log(html,css, js)
+    io.to(socketId).emit(ACTIONS.CODE_CHANGE, { html,css, js });
   });
 
   socket.on("disconnecting", () => {
-    const rooms = [...socket.rooms];
+    const rooms = Array.from(socket.rooms);
     rooms.forEach((roomId) => {
       socket.in(roomId).emit(ACTIONS.DISCONNECTED, {
         socketId: socket.id,
         username: userSocketMap[socket.id],
       });
+      socket.leave(roomId);
     });
     delete userSocketMap[socket.id];
-    socket.leave();
   });
 });
 

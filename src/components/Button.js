@@ -2,11 +2,11 @@ import { Link } from "react-router-dom"
 
 const PrimaryButton = ({ text, link, onClickFunc }) => {
   return (
-    <div className=" flex justify-center items">
+    <div className="primary-button-container">
       {link ? (
         <Link href={link}>
           <button
-            className="h-10 px-6 font-semibold rounded-md bg-primary text-black"
+            className="primary-button"
             type="submit"
           >
             {text}
@@ -15,7 +15,7 @@ const PrimaryButton = ({ text, link, onClickFunc }) => {
       ) : (
         <button
           onClick={onClickFunc}
-          className="h-10 px-6 font-semibold rounded-md bg-primary text-black"
+          className="primary-button"
           type="submit"
         >
           {text}

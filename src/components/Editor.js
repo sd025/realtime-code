@@ -1,15 +1,15 @@
-import Editor, { Monaco } from "@monaco-editor/react";
-import React, { useRef } from "react";
+import Editor from "@monaco-editor/react";
+import React from "react";
 import PrimaryButton from "./Button";
 
 const EditorComponent = ({ language, code, onChange, onClickFunc }) => {
   return (
     <div>
-      <div className="h-10 bg-bgdark p-8 flex items-center justify-center">
+      <div className="editor-header">
         <PrimaryButton text="Run" onClickFunc={onClickFunc} />
       </div>
       <Editor
-        className="text-xl"
+        className="editor-content"
         height="91vh"
         onChange={onChange}
         language={language}

@@ -14,6 +14,7 @@ app.use((req, res, next) => {
 });
 
 const userSocketMap = {};
+
 function getAllConnectedClients(roomId) {
 
   return Array.from(io.sockets.adapter.rooms.get(roomId) || []).map(

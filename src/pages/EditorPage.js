@@ -1,7 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import toast from "react-hot-toast";
 import ACTIONS from "../Actions";
-import Client from "../components/Client";
 import { initSocket } from "../socket";
 import { dummyFilesData } from "../helpers/data";
 import {
@@ -12,20 +11,18 @@ import {
 } from "react-router-dom";
 import EditorComponent from "../components/Editor";
 import Console from "../components/Console";
+import Client from "../components/Client";
 
 const EditorPage = () => {
   const [html, setHtml] = useState("<h1>Hello World</h1>");
   const [css, setCss] = useState("");
   const [js, setJs] = useState("console.log('Hello world')");
 
-  const fileNameBarClasses =
-    "flex items-center cursor-pointer hover:bg-black justify-start w-full p-2 ";
-
 
   const [activeFile, setActiveFile] = useState("index.html");
   const [srcDoc, setSrcDoc] = useState("");
   const socketRef = useRef(null);
-  const codeRef = useRef(null);
+  // const codeRef = useRef(null);
   const location = useLocation();
   const { roomId } = useParams();
   const reactNavigator = useNavigate();
@@ -168,12 +165,10 @@ const EditorPage = () => {
 
       case "style.css":
         setCss(value);
-
         break;
 
       case "script.js":
         setJs(value);
-
         break;
 
       default:
@@ -196,16 +191,15 @@ const EditorPage = () => {
   }
 
   return (
-    <div className="mainWrap">
+    <>
+    {/* <div className="mainWrap">
       <div className="aside">
         <div className="asideInner">
           <div className="logo">
             <h1>&lt; Multiplayer code &gt; </h1>
           </div>
-          <h3>Connected</h3>
           <div className="flex-col  my-4 w-full ">
             {Object.keys(dummyFilesData).map((keyName, i) => {
-              // @ts-ignore
               let fileData = dummyFilesData[keyName];
 
               return (
@@ -216,20 +210,17 @@ const EditorPage = () => {
                   }}
                   className={
                     fileData.name === activeFile
-                      ? fileNameBarClasses + "bg-black"
-                      : fileNameBarClasses
+                      ? 'bg-one'
+                      : 'bg-two'
                   }
                 >
-                  {/* <FontAwesomeIcon
-                    color={fileData.iconColor}
-                    icon={["fab", fileData.iconName as IconName]}
-                  /> */}
                   <img width="20px" height="20px" src={fileData.iconName} />
                   <p className="mx-4">{fileData.name}</p>
                 </div>
               );
             })}
           </div>
+          <h3>Connected</h3>
           <div className="clientsList">
             {clients.map((client) => (
               <Client key={client.socketId} username={client.username} />
@@ -243,7 +234,7 @@ const EditorPage = () => {
           Leave
         </button>
       </div>
-      <div className="editorWrap">
+      <div style={{ height: "98vh" }} class="complete-editor ">
         <EditorComponent
           onClickFunc={() => {
             changeCode();
@@ -257,17 +248,90 @@ const EditorPage = () => {
             dummyFilesData[activeFile]?.language
           }
         />
-        <div className="grid grid-rows-[65vh_225px]">
+      <div class="grid" style={{ gridTemplateRows: "65vh 225px" }}>
           <iframe
             srcDoc={srcDoc}
-            className="flex w-full h-full bg-white"
+            className="compileframe"
           ></iframe>
           <div className="bg-bgdark">
             <Console />
           </div>
         </div>
       </div>
-    </div>
+    </div> */}
+        <div className="main-screen">
+        <div>
+          <title>Editor | Code Online</title>
+        </div>
+        <div className="inner-screen">
+        <div className="aside">
+        <div className="asideInner">
+          <div className="logo">
+            <h1>&lt; Multiplayer code &gt; </h1>
+          </div>
+          <div className="flex-col  my-4 w-full ">
+            {Object.keys(dummyFilesData).map((keyName, i) => {
+              let fileData = dummyFilesData[keyName];
+
+              return (
+                <div
+                  key={fileData.language}
+                  onClick={() => {
+                    setActiveFile(fileData.name);
+                  }}
+                  className={
+                    fileData.name === activeFile
+                      ? 'bg-one'
+                      : 'bg-two'
+                  }
+                >
+                  <img width="20px" height="20px" src={fileData.iconName} />
+                  <p className="mx-4">{fileData.name}</p>
+                </div>
+              );
+            })}
+          </div>
+          <h3>Connected</h3>
+          <div className="clientsList">
+            {clients.map((client) => (
+              <Client key={client.socketId} username={client.username} />
+            ))}
+          </div>
+        </div>
+        <button className="btn copyBtn" onClick={copyRoomId}>
+          Copy ROOM ID
+        </button>
+        <button className="btn leaveBtn" onClick={leaveRoom}>
+          Leave
+        </button>
+      </div>
+          <div className="complete-editor">
+            <EditorComponent
+              onClickFunc={() => {
+                changeCode();
+              }}
+              onChange={(value) => {
+                ChangeCodeByFileName(activeFile, value);
+              }}
+              code={getCodeByFileName(activeFile)}
+              language={
+                // @ts-ignore
+                dummyFilesData[activeFile]?.language
+              }
+            />
+            <div className="grid-canvas">
+              <iframe
+                srcDoc={srcDoc}
+                className="compile-display"
+              ></iframe>
+              <div className="bg-bgdark">
+                <Console />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      </>
   );
 };
 

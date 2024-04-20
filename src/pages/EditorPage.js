@@ -1,12 +1,12 @@
 import React, { useState, useRef, useEffect } from "react";
 import toast from "react-hot-toast";
 import ACTIONS from "../Actions";
-import { initSocket } from "../socket";
+import { initSocket } from "../helpers/socket";
 import { dummyFilesData } from "../helpers/data";
 import {
+  Navigate,
   useLocation,
   useNavigate,
-  Navigate,
   useParams,
 } from "react-router-dom";
 import EditorComponent from "../components/Editor";
@@ -18,11 +18,10 @@ const EditorPage = () => {
   const [css, setCss] = useState("");
   const [js, setJs] = useState("console.log('Hello world')");
 
-
   const [activeFile, setActiveFile] = useState("index.html");
   const [srcDoc, setSrcDoc] = useState("");
+
   const socketRef = useRef(null);
-  // const codeRef = useRef(null);
   const location = useLocation();
   const { roomId } = useParams();
   const reactNavigator = useNavigate();
@@ -37,7 +36,9 @@ const EditorPage = () => {
       function handleErrors(e) {
         console.error("Socket error:", e.message || e);
         toast.error("Socket connection failed, try again later.");
-        reactNavigator("/");
+        setTimeout(() => {
+          reactNavigator("/");
+        }, 4000);
       }
 
       socketRef.current.emit(ACTIONS.JOIN, {
@@ -49,17 +50,19 @@ const EditorPage = () => {
       socketRef.current.on(
         ACTIONS.JOINED,
         ({ clients, username, socketId }) => {
-          if (username !== location.state?.username) {
-            toast.success(`${username} joined the room.`);
-            console.log(`${username} joined`);
+          if (socketId !== socketRef.current.id) {
+            if (username !== location.state?.username) {
+              toast.success(`${username} joined the room.`);
+              console.log(`${username} joined`);
+            }
+            setClients(clients);
+            socketRef.current.emit(ACTIONS.SYNC_CODE, {
+              socketId,
+              html,
+              css,
+              js,
+            });
           }
-          setClients(clients);
-          socketRef.current.emit(ACTIONS.SYNC_CODE, {
-            socketId,
-            html,
-            css,
-            js,
-          });
         }
       );
 
@@ -85,6 +88,13 @@ const EditorPage = () => {
         socketRef.current.off(ACTIONS.DISCONNECTED);
       }
     };
+  }, []);
+
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      changeCode();
+    }, 1000);
+    return () => clearTimeout(timeout);
   }, []);
 
   async function copyRoomId() {
@@ -130,13 +140,6 @@ const EditorPage = () => {
     `);
   };
 
-  useEffect(() => {
-    const timeout = setTimeout(() => {
-      changeCode();
-    }, 1000);
-    return () => clearTimeout(timeout);
-  }, []);
-
   const getCodeByFileName = (fileName) => {
     let code = "";
     switch (fileName) {
@@ -157,6 +160,7 @@ const EditorPage = () => {
     }
     return code;
   };
+
   const ChangeCodeByFileName = (fileName, value) => {
     switch (fileName) {
       case "index.html":
@@ -192,166 +196,47 @@ const EditorPage = () => {
 
   return (
     <>
-    {/* <div className="mainWrap">
-      <div className="aside">
-        <div className="asideInner">
-          <div className="logo">
-            <h1>&lt; Multiplayer code &gt; </h1>
-          </div>
-          <div className="flex-col  my-4 w-full ">
-            {Object.keys(dummyFilesData).map((keyName, i) => {
-              let fileData = dummyFilesData[keyName];
-
-              return (
-                <div
-                  key={fileData.language}
-                  onClick={() => {
-                    setActiveFile(fileData.name);
-                  }}
-                  className={
-                    fileData.name === activeFile
-                      ? 'bg-one'
-                      : 'bg-two'
-                  }
-                >
-                  <img width="20px" height="20px" src={fileData.iconName} />
-                  <p className="mx-4">{fileData.name}</p>
-                </div>
-              );
-            })}
-          </div>
-          <h3>Connected</h3>
-          <div className="clientsList">
-            {clients.map((client) => (
-              <Client key={client.socketId} username={client.username} />
-            ))}
-          </div>
-        </div>
-        <button className="btn copyBtn" onClick={copyRoomId}>
-          Copy ROOM ID
-        </button>
-        <button className="btn leaveBtn" onClick={leaveRoom}>
-          Leave
-        </button>
-      </div>
-      <div style={{ height: "98vh" }} class="complete-editor ">
-        <EditorComponent
-          onClickFunc={() => {
-            changeCode();
-          }}
-          onChange={(value) => {
-            ChangeCodeByFileName(activeFile, value);
-          }}
-          code={getCodeByFileName(activeFile)}
-          language={
-            // @ts-ignore
-            dummyFilesData[activeFile]?.language
-          }
-        />
-      <div class="grid" style={{ gridTemplateRows: "65vh 225px" }}>
-          <iframe
-            srcDoc={srcDoc}
-            className="compileframe"
-          ></iframe>
-          <div className="bg-bgdark">
-            <Console />
-          </div>
-        </div>
-      </div>
-    </div> */}
-        <div className="main-screen">
+      <div className="main-screen">
         <div className="inner-screen">
-          {/* <div className="left-sidebar">
-            <div className="inner-sidebar">
-              <div className="title-sidebar">
-                <h1 className="head-side">Code Online</h1>
+          
+          <div className="aside">
+            <div className="asideInner">
+              <div className="logo">
+                <h1>&lt; Multiplayer code &gt; </h1>
               </div>
-              <hr />
               <div className="mid-side">
-            {Object.keys(dummyFilesData).map((keyName, i) => {
-              let fileData = dummyFilesData[keyName];
-
-              return (
-                <div
-                  key={fileData.language}
-                  onClick={() => {
-                    setActiveFile(fileData.name);
-                  }}
-                  className={
-                    fileData.name === activeFile
-                      ? 'bg-one'
-                      : 'bg-two'
-                  }
-                >
-                  <img width="20px" height="20px" src={fileData.iconName} />
-                  <p className="title-tech">{fileData.name}</p>
-                </div>
-              );
-            })}
-          </div>
+                {Object.keys(dummyFilesData).map((keyName, i) => {
+                  let fileData = dummyFilesData[keyName];
+                  return (
+                    <div
+                      key={fileData.language}
+                      onClick={() => {
+                        setActiveFile(fileData.name);
+                      }}
+                      className={
+                        fileData.name === activeFile ? "bg-one" : "bg-two"
+                      }
+                    >
+                      <img width="20px" height="20px" src={fileData.iconName} />
+                      <p className="title-tech">{fileData.name}</p>
+                    </div>
+                  );
+                })}
+              </div>
               <h3>Connected</h3>
               <div className="clientsList">
-              {clients.map((client) => (
-              <Client key={client.socketId} username={client.username} />
-            ))}
+                {clients.map((client) => (
+                  <Client key={client.socketId} username={client.username} />
+                ))}
               </div>
             </div>
-            <div className="mx-3">
-              <button
-                onClick={copyRoomId}
-                className="btn copyBtn"
-              >
-                Copy ROOM ID
-              </button>
-              <button
-                onClick={leaveRoom}
-                className="btn leaveBtn"
-              >
-                Leave
-              </button>
-            </div>
-          </div> */}
-          <div className="aside">
-        <div className="asideInner">
-          <div className="logo">
-            <h1>&lt; Multiplayer code &gt; </h1>
+            <button className="btn copyBtn" onClick={copyRoomId}>
+              Share Room ID
+            </button>
+            <button className="btn leaveBtn" onClick={leaveRoom}>
+              Leave
+            </button>
           </div>
-          <div className="mid-side">
-            {Object.keys(dummyFilesData).map((keyName, i) => {
-              let fileData = dummyFilesData[keyName];
-
-              return (
-                <div
-                  key={fileData.language}
-                  onClick={() => {
-                    setActiveFile(fileData.name);
-                  }}
-                  className={
-                    fileData.name === activeFile
-                      ? 'bg-one'
-                      : 'bg-two'
-                  }
-                >
-                  <img width="20px" height="20px" src={fileData.iconName} />
-                  <p className="title-tech">{fileData.name}</p>
-                </div>
-              );
-            })}
-          </div>
-          <h3>Connected</h3>
-          <div className="clientsList">
-            {clients.map((client) => (
-              <Client key={client.socketId} username={client.username} />
-            ))}
-          </div>
-        </div>
-        <button className="btn copyBtn" onClick={copyRoomId}>
-          Share Room ID
-        </button>
-        <button className="btn leaveBtn" onClick={leaveRoom}>
-          Leave
-        </button>
-      </div>
           <div className="complete-editor">
             <EditorComponent
               onClickFunc={() => {
@@ -367,10 +252,7 @@ const EditorPage = () => {
               }
             />
             <div className="grid-canvas">
-              <iframe
-                srcDoc={srcDoc}
-                className="compile-display"
-              ></iframe>
+              <iframe srcDoc={srcDoc} className="compile-display"></iframe>
               <div className="bg-bgdark">
                 <Console />
               </div>
@@ -378,7 +260,7 @@ const EditorPage = () => {
           </div>
         </div>
       </div>
-      </>
+    </>
   );
 };
 

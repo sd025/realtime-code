@@ -1,13 +1,25 @@
-import toast from 'react-hot-toast';
-import { io } from 'socket.io-client';
+import { io } from "socket.io-client";
 
 export const initSocket = async () => {
-    const option = {
-        forceNew: true,
-        reconnectionAttempts: 10000,
-        timeout: 10000,
-        transports: ['websocket']
-    };
+  const options = {
+    "force new connection": true,
+    reconnectionAttempt: "Infinity",
+    timeout: 10000,
+    transports: ["websocket"],
+  };
+  const socket = io("http://localhost:4000", options);
 
-    return io("https://codeonline-server.herokuapp.com/", option);
+  socket.on("connect", () => {
+    console.log("Socket connected:", socket.id);
+  });
+
+  socket.on("connect_error", (err) => {
+    console.error("Socket connection error:", err);
+  });
+
+  socket.on("disconnect", () => {
+    console.log("Socket disconnected");
+  });
+
+  return socket;
 };

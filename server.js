@@ -1,19 +1,21 @@
 const express = require("express");
-const app = express();
 const http = require("http");
 const path = require("path");
 const { Server } = require("socket.io");
 const ACTIONS = require("./src/Actions");
 
+const app = express();
 const server = http.createServer(app);
 const io = new Server(server);
 
+app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static("build"));
 app.use((req, res, next) => {
   res.sendFile(path.join(__dirname, "build", "index.html"));
 });
 
 const userSocketMap = {};
+const codeMap = {};
 
 function getAllConnectedClients(roomId) {
 
@@ -43,11 +45,12 @@ io.on("connection", (socket) => {
       });
     });
 
-    
-    io.to(socket.id).emit(ACTIONS.CODE_CHANGE, { html, css, js });
+    const code = codeMap[roomId] || { html: '', css: '', js: '' }; 
+    io.to(socket.id).emit(ACTIONS.CODE_CHANGE, code);
   });
 
   socket.on(ACTIONS.CODE_CHANGE, ({ roomId, html,css, js }) => {
+    codeMap[roomId] = { html, css, js };
     socket.in(roomId).emit(ACTIONS.CODE_CHANGE, { html,css, js });
   });
 

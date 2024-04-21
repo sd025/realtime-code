@@ -131,6 +131,12 @@ const EditorPage = () => {
       ${js}</script>
     </html>
     `);
+    socketRef.current.emit(ACTIONS.CODE_CHANGE, {
+      roomId,
+      html,
+      css,
+      js,
+    });
   };
 
   useEffect(() => {

@@ -42,6 +42,9 @@ io.on("connection", (socket) => {
         socketId: socket.id,
       });
     });
+
+    
+    io.to(socket.id).emit(ACTIONS.CODE_CHANGE, { html, css, js });
   });
 
   socket.on(ACTIONS.CODE_CHANGE, ({ roomId, html,css, js }) => {
@@ -49,7 +52,6 @@ io.on("connection", (socket) => {
   });
 
   socket.on(ACTIONS.SYNC_CODE, ({ socketId, html,css, js }) => {
-    console.log(html,css, js)
     io.to(socketId).emit(ACTIONS.CODE_CHANGE, { html,css, js });
   });
 
@@ -60,9 +62,9 @@ io.on("connection", (socket) => {
         socketId: socket.id,
         username: userSocketMap[socket.id],
       });
+      socket.leave();
     });
     delete userSocketMap[socket.id];
-    socket.leave();
   });
 });
 

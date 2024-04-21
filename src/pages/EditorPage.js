@@ -4,9 +4,9 @@ import ACTIONS from "../Actions";
 import { initSocket } from "../helpers/socket";
 import { dummyFilesData } from "../helpers/data";
 import {
-  Navigate,
   useLocation,
   useNavigate,
+  Navigate,
   useParams,
 } from "react-router-dom";
 import EditorComponent from "../components/Editor";
@@ -27,75 +27,24 @@ const EditorPage = () => {
   const reactNavigator = useNavigate();
   const [clients, setClients] = useState([]);
 
-  useEffect(() => {
-    const init = async () => {
-      socketRef.current = await initSocket();
-      socketRef.current.on("connect_error", (err) => handleErrors(err));
-      socketRef.current.on("connect_failed", (err) => handleErrors(err));
+  function joinEventHandler({ clients, username, socketId }) {
+    if (username !== location.state?.username) {
+      toast.success(`${username} joined the room`);
+    }
+    setClients(clients);
+    socketRef.current?.emit(ACTIONS.SYNC_CODE, {
+      socketId,
+      html,
+      css,
+      js,
+    });
+  }
 
-      function handleErrors(e) {
-        console.error("Socket error:", e.message || e);
-        toast.error("Socket connection failed, try again later.");
-        setTimeout(() => {
-          reactNavigator("/");
-        }, 4000);
-      }
-
-      socketRef.current.emit(ACTIONS.JOIN, {
-        roomId,
-        username: location.state?.username,
-      });
-
-      // Listening for joined event
-      socketRef.current.on(
-        ACTIONS.JOINED,
-        ({ clients, username, socketId }) => {
-          if (socketId !== socketRef.current.id) {
-            if (username !== location.state?.username) {
-              toast.success(`${username} joined the room.`);
-              console.log(`${username} joined`);
-            }
-            setClients(clients);
-            socketRef.current.emit(ACTIONS.SYNC_CODE, {
-              socketId,
-              html,
-              css,
-              js,
-            });
-          }
-        }
-      );
-
-      socketRef.current.on(ACTIONS.CODE_CHANGE, ({ html, css, js }) => {
-        setHtml(html);
-        setCss(css);
-        setJs(js);
-      });
-
-      // Listening for disconnected
-      socketRef.current.on(ACTIONS.DISCONNECTED, ({ socketId, username }) => {
-        toast.success(`${username} left the room.`);
-        setClients((prev) => {
-          return prev.filter((client) => client.socketId !== socketId);
-        });
-      });
-    };
-    init();
-    return () => {
-      if (socketRef.current) {
-        socketRef.current.disconnect();
-        socketRef.current.off(ACTIONS.JOINED);
-        socketRef.current.off(ACTIONS.DISCONNECTED);
-      }
-    };
-  }, []);
-
-  useEffect(() => {
-    const timeout = setTimeout(() => {
-      changeCode();
-    }, 1000);
-    return () => clearTimeout(timeout);
-  }, []);
+  function handleErrors(e) {
+    console.log("socket error", e);
+    toast.error("Socket connection failed, try again later.");
+    reactNavigator("/");
+  }
 
   async function copyRoomId() {
     try {
@@ -106,6 +55,50 @@ const EditorPage = () => {
       console.error(err);
     }
   }
+
+  function leaveRoom() {
+    reactNavigator("/");
+  }
+
+  useEffect(() => {
+    if (!location.state) {
+      return <Navigate to="/" />;
+    }
+    const init = async () => {
+      socketRef.current = await initSocket();
+      socketRef.current.on("connect_error", (err) => handleErrors(err));
+      socketRef.current.on("connect_failed", (err) => handleErrors(err));
+
+      socketRef.current.emit(ACTIONS.JOIN, {
+        roomId,
+        username: location.state?.username,
+      });
+
+      // Listening for joined event
+      socketRef.current.on(ACTIONS.JOINED, joinEventHandler);
+
+      socketRef.current.on(ACTIONS.CODE_CHANGE, ({ html, css, js }) => {
+        setHtml(html);
+        setCss(css);
+        setJs(js);
+      });
+      // Listening for disconnected
+      socketRef.current.on(ACTIONS.DISCONNECTED, ({ socketId, username }) => {
+        toast.success(`${username} left the room.`);
+        setClients((prev) => {
+          return prev.filter((client) => client.socketId !== socketId);
+        });
+      });
+    };
+
+    init();
+
+    return () => {
+      socketRef.current?.disconnect();
+      socketRef.current?.off(ACTIONS.JOINED);
+      socketRef.current?.off(ACTIONS.DISCONNECTED);
+    };
+  }, []);
 
   const changeCode = () => {
     setSrcDoc(`
@@ -140,6 +133,13 @@ const EditorPage = () => {
     `);
   };
 
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      changeCode();
+    }, 1000);
+    return () => clearTimeout(timeout);
+  }, []);
+
   const getCodeByFileName = (fileName) => {
     let code = "";
     switch (fileName) {
@@ -160,7 +160,6 @@ const EditorPage = () => {
     }
     return code;
   };
-
   const ChangeCodeByFileName = (fileName, value) => {
     switch (fileName) {
       case "index.html":
@@ -186,81 +185,72 @@ const EditorPage = () => {
     });
   };
 
-  function leaveRoom() {
-    reactNavigator("/");
-  }
-
-  if (!location.state) {
-    return <Navigate to="/" />;
-  }
-
   return (
-    <>
-      <div className="main-screen">
-        <div className="inner-screen">
-          
-          <div className="aside">
-            <div className="asideInner">
-              <div className="logo">
-                <h1>&lt; Multiplayer code &gt; </h1>
-              </div>
-              <div className="mid-side">
-                {Object.keys(dummyFilesData).map((keyName, i) => {
-                  let fileData = dummyFilesData[keyName];
-                  return (
-                    <div
-                      key={fileData.language}
-                      onClick={() => {
-                        setActiveFile(fileData.name);
-                      }}
-                      className={
-                        fileData.name === activeFile ? "bg-one" : "bg-two"
-                      }
-                    >
-                      <img width="20px" height="20px" src={fileData.iconName} />
-                      <p className="title-tech">{fileData.name}</p>
-                    </div>
-                  );
-                })}
-              </div>
-              <h3>Connected</h3>
-              <div className="clientsList">
-                {clients.map((client) => (
-                  <Client key={client.socketId} username={client.username} />
-                ))}
-              </div>
+    <div className="main-screen">
+      <div className="inner-screen">
+        <div className="aside">
+          <div className="asideInner">
+            <div className="logo">
+              <h1>&lt; Multiplayer code &gt; </h1>
             </div>
-            <button className="btn copyBtn" onClick={copyRoomId}>
-              Share Room ID
-            </button>
-            <button className="btn leaveBtn" onClick={leaveRoom}>
-              Leave
-            </button>
+            <div className="mid-side">
+              {Object.keys(dummyFilesData).map((keyName, i) => {
+                let fileData = dummyFilesData[keyName];
+                return (
+                  <div
+                    key={fileData.language}
+                    onClick={() => {
+                      setActiveFile(fileData.name);
+                    }}
+                    className={
+                      fileData.name === activeFile ? "bg-one" : "bg-two"
+                    }
+                  >
+                    <img
+                      width="20px"
+                      height="20px"
+                      src={fileData.iconName}
+                      alt={fileData.name}
+                    />
+                    <p className="title-tech">{fileData.name}</p>
+                  </div>
+                );
+              })}
+            </div>
+            <h3>Connected</h3>
+            <div className="clientsList">
+              {clients.map((client) => (
+                <Client key={client.socketId} username={client.username} />
+              ))}
+            </div>
           </div>
-          <div className="complete-editor">
-            <EditorComponent
-              onClickFunc={() => {
-                changeCode();
-              }}
-              onChange={(value) => {
-                ChangeCodeByFileName(activeFile, value);
-              }}
-              code={getCodeByFileName(activeFile)}
-              language={
-                // @ts-ignore
-                dummyFilesData[activeFile]?.language
-              }
-            />
-            <div className="grid-canvas">
-              <iframe srcDoc={srcDoc} className="compile-display"></iframe>
-              <div className="bg-bgdark">
-                <Console />
-              </div>
+          <button className="btn copyBtn" onClick={copyRoomId}>
+            Share Room ID
+          </button>
+          <button className="btn leaveBtn" onClick={leaveRoom}>
+            Leave
+          </button>
+        </div>
+        <div className="complete-editor">
+          <EditorComponent
+            onClickFunc={() => {
+              changeCode();
+            }}
+            onChange={(value) => {
+              ChangeCodeByFileName(activeFile, value);
+            }}
+            code={getCodeByFileName(activeFile)}
+            language={dummyFilesData[activeFile]?.language}
+          />
+          <div className="grid-canvas">
+            <iframe srcDoc={srcDoc} className="compile-display"></iframe>
+            <div className="bg-bgdark">
+              <Console />
             </div>
           </div>
         </div>
       </div>
-    </>
+    </div>
   );
 };
 

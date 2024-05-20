@@ -1,10 +1,17 @@
+Some Features:
+
+- 👾 Real-time collaboration with Socket.io
+- 👨🏻‍🏫 Editor and Compiler feature
+- 🚀 Online user status
+- 👨🏻‍💻 Open source environment for developers
+
 Built With
 
-NextJs
-ReactJs
-Socket.io
-Express
-NodeJs
+- NextJs
+- ReactJs
+- Socket.io
+- Express
+- NodeJs
 
 # Getting Started with Create React App
 
